@@ -12,7 +12,7 @@ template <class T>
 class SeqList {
 private:
     T* array;
-    int max{};
+    int max;
     int last;
 public:
     SeqList(int max);
@@ -230,7 +230,7 @@ private:
     void writePersonList();
 public:
     View() {
-        deviceList = new SeqList<Device>(50);
+        deviceList = new SeqList<Device>(100);
         personList = new SeqList<Person>(20);
         readPersonList();
         readDeviceList();
@@ -383,7 +383,6 @@ void View::queryPersonView() {
     system("clear");
     cout << "====== 查询管理员界面 ======" << endl;
     int nums = personList->length();
-    cout << nums << endl;
     for (int i = 0; i < nums; i++) {
         Person person;
         personList->getData(i, person);
@@ -466,12 +465,13 @@ void View::deletePersonView() {
         return;
     }
 
+    Person person;
+    personList->remove(i, person);
+
     char isDelDevice;
     cout << "是否需要一并删除其管理的设备" << endl;
     cout << "<y/n>: ";
     cin >> isDelDevice;
-    Person person;
-    personList->remove(i, person);
     if (isDelDevice == 'y') {
         int deviceNum = deviceList->length();
         // 从后向前遍历，同时删除
@@ -481,6 +481,25 @@ void View::deletePersonView() {
             if (device.getPersonId() == id) {
                 Device tmp;
                 deviceList->remove(i, tmp);
+            }
+        }
+    }
+
+    char isChangePerson;
+    cout << "是否需要将该人员管理的设备移交给其他人" << endl;
+    cout << "<y/n>: ";
+    cin >> isChangePerson;
+    if (isChangePerson == 'y') {
+        cout << "请输入需要移交目标人员的编号: ";
+        int pp;
+        cin >> pp;
+        int deviceNum = deviceList->length();
+        for (int i = deviceNum; i >= 0; i--) {
+            Device device;
+            deviceList->getData(i, device);
+            if (device.getPersonId() == id) {
+                device.setPersonId(pp);
+                deviceList->setData(i, device);
             }
         }
     }
@@ -593,7 +612,6 @@ void View::insertDeviceView() {
 
     // 判断管理员编号是否存在
     int personNums = personList->length();
-    cout << personNums << endl;
     bool isExistPerson = false;
     for (int i =0; i < personNums; i++) {
         Person person;
